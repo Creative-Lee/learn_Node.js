@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./practice/main.js -e js" 
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Creative-Lee/learn_Node.js/issues"
   },
-  "homepage": "https://github.com/Creative-Lee/learn_Node.js#readme"
+  "homepage": "https://github.com/Creative-Lee/learn_Node.js#readme",
+  "dependencies": {
+    "nodemon": "^2.0.19"
+  }
 }
