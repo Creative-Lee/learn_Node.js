@@ -3,6 +3,8 @@ const app = express()
 const PORT = 3000
 const fs = require('fs')
 const template = require('./lib/template.js')
+const path = require('path')
+const sanitizeHtml = require('sanitize-html')
 
 app.get('/', (req, res) => {
   fs.readdir('./data', (error, filelist) => {
@@ -19,8 +21,32 @@ app.get('/', (req, res) => {
   })
 })
 
-app.get('/page/:id/:number', (req, res) => {
-  res.send(req.params)
+app.get('/page/:id', (req, res) => {
+  fs.readdir('./data', function (error, filelist) {
+    var filteredId = path.parse(req.params.id).base
+
+    fs.readFile(`data/${filteredId}`, 'utf8', function (err, description) {
+      var title = req.params.id
+      var sanitizedTitle = sanitizeHtml(title)
+      var sanitizedDescription = sanitizeHtml(description, {
+        allowedTags: ['h1'],
+      })
+      var list = template.list(filelist)
+      var html = template.HTML(
+        sanitizedTitle,
+        list,
+        `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
+        `<a href="/create">create</a>
+          <a href="/update?id=${sanitizedTitle}">update</a>
+          <form action="delete_process" method="post">
+            <input type="hidden" name="id" value="${sanitizedTitle}">
+            <input type="submit" value="delete">
+          </form>`
+      )
+
+      res.send(html)
+    })
+  })
 })
 
 app.listen(PORT, () => console.log(`It's running now - port: ${PORT}`))
@@ -31,7 +57,6 @@ app.listen(PORT, () => console.log(`It's running now - port: ${PORT}`))
 // var qs = require('querystring');
 // var template = require('./lib/template.js');
 // var path = require('path');
-// var sanitizeHtml = require('sanitize-html');
 
 // var app = http.createServer(function(request,response){
 //     var _url = request.url;
