@@ -91,6 +91,52 @@ app.post('/create_process', (req, res) => {
   })
 })
 
+app.get('/update/:id', (req, res) => {
+  fs.readdir('./data', function (error, filelist) {
+    var filteredId = req.params.id
+
+    fs.readFile(`data/${filteredId}`, 'utf8', function (err, description) {
+      var title = filteredId
+      var list = template.list(filelist)
+      var html = template.HTML(
+        title,
+        list,
+        `
+          <form action="/update_process" method="post">
+            <input type="hidden" name="id" value="${title}">
+            <p><input type="text" name="title" placeholder="title" value="${title}"></p>
+            <p>
+            <textarea name="description" placeholder="description">${description}</textarea>
+            </p>
+            <p>
+            <input type="submit">
+            </p>
+          </form>
+        `,
+        `<a href="/create">create</a>`
+      )
+
+      res.send(html)
+    })
+  })
+})
+
+app.post('/update_process', (req, res) => {
+  var body = ''
+  req.on('data', function (data) {
+    body = body + data
+  })
+  req.on('end', function () {
+    var { id, title, description } = qs.parse(body)
+    console.log(id, title, description)
+    fs.rename(`data/${id}`, `data/${title}`, function (error) {
+      fs.writeFile(`data/${title}`, description, 'utf8', function (err) {
+        res.redirect(`/page/${encodeURI(title)}`)
+      })
+    })
+  })
+})
+
 app.listen(PORT, () => console.log(`It's running now - port: ${PORT}`))
 
 // var http = require('http');
