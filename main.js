@@ -39,7 +39,7 @@ app.get('/page/:id', (req, res) => {
         `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
         `<a href="/create">create</a>
           <a href="/update/${sanitizedTitle}">update</a>
-          <form action="delete_process" method="post">
+          <form action="/delete_process" method="post">
             <input type="hidden" name="id" value="${sanitizedTitle}">
             <input type="submit" value="delete">
           </form>`
@@ -128,7 +128,7 @@ app.post('/update_process', (req, res) => {
   })
   req.on('end', function () {
     var { id, title, description } = qs.parse(body)
-    console.log(id, title, description)
+
     fs.rename(`data/${id}`, `data/${title}`, function (error) {
       fs.writeFile(`data/${title}`, description, 'utf8', function (err) {
         res.redirect(`/page/${encodeURI(title)}`)
@@ -137,40 +137,18 @@ app.post('/update_process', (req, res) => {
   })
 })
 
+app.post('/delete_process', (req, res) => {
+  var body = ''
+  req.on('data', function (data) {
+    body = body + data
+  })
+  req.on('end', function () {
+    var { id } = qs.parse(body)
+    console.log(id)
+    fs.unlink(`data/${id}`, function (error) {
+      res.redirect('/')
+    })
+  })
+})
+
 app.listen(PORT, () => console.log(`It's running now - port: ${PORT}`))
-
-// var http = require('http');
-// var fs = require('fs');
-// var url = require('url');
-// var template = require('./lib/template.js');
-// var path = require('path');
-
-// var app = http.createServer(function(request,response){
-//     var _url = request.url;
-//     var queryData = url.parse(_url, true).query;
-//     var pathname = url.parse(_url, true).pathname;
-//
-//      else if(pathname === '/update'){
-//
-//     } else if(pathname === '/update_process'){
-//
-//     } else if(pathname === '/delete_process'){
-//       var body = '';
-//       request.on('data', function(data){
-//           body = body + data;
-//       });
-//       request.on('end', function(){
-//           var post = qs.parse(body);
-//           var id = post.id;
-//           var filteredId = path.parse(id).base;
-//           fs.unlink(`data/${filteredId}`, function(error){
-//             response.writeHead(302, {Location: `/`});
-//             response.end();
-//           })
-//       });
-//     } else {
-//       response.writeHead(404);
-//       response.end('Not found');
-//     }
-// });
-// app.listen(3000);
